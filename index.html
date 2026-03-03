@@ -1,3 +1,5 @@
+<!-- IDENTIFIED ISSUES: DISASTERS DO NOT SEEM TO OCCUR WHEN CHCKED ON. OBJECTIVES MAY NOT BE ACHIEVABLE. -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1089,7 +1091,7 @@
         <div class="objective-panel">
           <h2><i class="fas fa-tasks"></i> Current Objective</h2>
           <div id="objectiveDisplay" class="objective-text">
-            Increase pademelon population to 200
+            Grow pademelon population to 120
           </div>
           <div class="progress-container">
             <div class="progress-bar" style="width: 0%"></div>
@@ -1188,11 +1190,11 @@
             </div>
             <div class="achievement-item">
               <i class="fas fa-fire"></i>
-              <div class="achievement-text">Survive 8 natural disasters to earn the Disaster Survivor achievement</div>
+              <div class="achievement-text">Survive 5 natural disasters to earn the Disaster Survivor achievement</div>
             </div>
             <div class="achievement-item">
               <i class="fas fa-balance-scale"></i>
-              <div class="achievement-text">Maintain balanced populations for 1500 frames to earn the Balance Keeper achievement</div>
+              <div class="achievement-text">Maintain balanced populations for 800 frames to earn the Balance Keeper achievement</div>
             </div>
           </div>
         </div>
@@ -1257,7 +1259,7 @@
         let stabilityCheckFrames = 0;
         const stabilityThreshold = 1000;
         const stabilityPoints = 50;
-        const rangerBadgePoints = 1500;
+        const rangerBadgePoints = 1000; // Reduced from 1500 for better achievement rate
         let rangerBadgeAchieved = false;
 
         // Speed control
@@ -1273,11 +1275,11 @@
         let maxDevils = 0;
         let maxBandicoots = 0;
 
-        // Disease memory - makes disease effects linger realistically
+        // Disease memory
         let diseasePressure = 0;
 
-        // Ecological inertia - makes ecosystems respond more slowly to changes (like real nature)
-        const ecologicalInertia = 0.3; // 30% of change happens per frame, creating lag
+        // Ecological inertia/smoothing factors
+        const ecologicalInertia = 0.3; // 30% of change happens per frame, creating realistic lag
         let smoothedGrass = 0;
         let smoothedPademelons = 0;
         let smoothedDevils = 0;
@@ -1289,40 +1291,40 @@
         let devilParticles = [];
         let bandicootParticles = [];
 
-        // Learning objectives
+        // Learning objectives - UPDATED with achievable thresholds
         let objectives = [
           { 
-            description: "Increase pademelon population to 200", 
-            target: 200, 
+            description: "Grow pademelon population to 120", 
+            target: 120, 
             achieved: false, 
             points: 200, 
             type: "pademelons" 
           },
           { 
-            description: "Maintain devil population > 100 with grass > 400", 
-            target: 100, 
+            description: "Maintain devil population > 50 with grass > 300", 
+            target: 50, 
             achieved: false, 
             points: 300, 
             type: "apex_stability" 
           },
           { 
-            description: "Trigger bandicoot-driven grass recovery (50% increase)", 
-            target: 1.5, 
+            description: "Let bandicoots boost grass by 30%", 
+            target: 1.3, 
             achieved: false, 
             points: 200, 
             type: "keystone_effect" 
           },
           { 
-            description: "Survive 8 natural disasters", 
-            target: 8, 
+            description: "Survive 5 natural disasters", 
+            target: 5, 
             achieved: false, 
             points: 100, 
             count: 0, 
             type: "disasters" 
           },
           { 
-            description: "Maintain biodiversity index > 0.7 for 1000 frames", 
-            target: 1000, 
+            description: "Maintain biodiversity index > 0.6 for 500 frames", 
+            target: 500, 
             achieved: false, 
             points: 150, 
             type: "biodiversity" 
@@ -1331,28 +1333,28 @@
 
         let ongoingObjectives = [
           { 
-            description: "Keep grass population > 700 for 800 frames", 
-            target: 800, 
+            description: "Keep grass population > 500 for 500 frames", 
+            target: 500, 
             achieved: false, 
             points: 300, 
             type: "grass", 
-            condition: (g) => g > 700 
+            condition: (g) => g > 500 
           },
           { 
-            description: "Keep devil population > 70 for 800 frames", 
-            target: 800, 
+            description: "Keep devil population > 40 for 500 frames", 
+            target: 500, 
             achieved: false, 
             points: 300, 
             type: "devils", 
-            condition: (d) => d > 70 
+            condition: (d) => d > 40 
           },
           { 
-            description: "Maintain balanced ecosystem for 1500 frames", 
-            target: 1500, 
+            description: "Maintain balanced ecosystem for 800 frames", 
+            target: 800, 
             achieved: false, 
             points: 500, 
             type: "balanced", 
-            condition: (g, p, d, b) => g > 500 && p > 100 && d > 50 && b > 100 
+            condition: (g, p, d, b) => g > 400 && p > 60 && d > 25 && b > 40 
           }
         ];
 
@@ -1363,14 +1365,14 @@
             points: 500 
           },
           { 
-            description: "Devil Advocate: Maintain healthy devil population for 5000 frames", 
+            description: "Devil Advocate: Keep devils > 30 for 2000 frames", 
             achieved: false, 
             frames: 0, 
-            target: 5000, 
+            target: 2000, 
             points: 300 
           },
           { 
-            description: "Keystone Keeper: Double bandicoot population from starting value", 
+            description: "Keystone Keeper: Grow bandicoots to 60", 
             achieved: false, 
             target: 60, 
             points: 200 
@@ -1623,12 +1625,20 @@
           diseasePressure = 0;
           
           // Reset objectives
-          objectives.forEach(obj => obj.achieved = false);
+          objectives.forEach(obj => {
+            obj.achieved = false;
+            if (obj.type === "disasters") obj.count = 0;
+          });
+          
           ongoingObjectives.forEach(obj => {
             obj.achieved = false;
-            obj.target = obj.type === "balanced" ? 1500 : 800;
+            obj.target = obj.type === "balanced" ? 800 : 500;
           });
-          achievements.forEach(ach => ach.achieved = false);
+          
+          achievements.forEach(ach => {
+            ach.achieved = false;
+            if (ach.description.includes("devil population")) ach.frames = 0;
+          });
           
           // Reset chart
           if (chart) {
@@ -1669,12 +1679,6 @@
           const temperature = getModifiedTemperature();
           const invasiveSpecies = parseFloat(document.getElementById("invasiveSpecies").value);
           const humanImpact = parseFloat(document.getElementById("humanImpact").value);
-          
-          // Store old values for comparison
-          let oldGrass = grass;
-          let oldPademelons = pademelons;
-          let oldDevils = devils;
-          let oldBandicoots = bandicoots;
           
           // Update populations with realistic ecological interactions
           updateGrass(rainfall, invasiveSpecies);
@@ -2148,16 +2152,17 @@
                 isAchieved = pademelons >= obj.target;
                 break;
               case "apex_stability":
-                isAchieved = devils >= obj.target && grass > 400;
+                isAchieved = devils >= obj.target && grass > 300;
                 break;
               case "keystone_effect":
-                isAchieved = grass >= 400 * obj.target;
+                // Check if grass has grown significantly from baseline
+                isAchieved = grass >= 400 * 1.3; // 30% boost from 400 baseline
                 break;
               case "disasters":
                 isAchieved = (obj.count || 0) >= obj.target;
                 break;
               case "biodiversity":
-                isAchieved = biodiversityIndex > 0.7 && customFrameCount >= obj.target;
+                isAchieved = biodiversityIndex > 0.6 && customFrameCount >= obj.target;
                 break;
             }
             
@@ -2194,7 +2199,7 @@
               }
             } else {
               // Reset progress if condition fails
-              obj.target = obj.type === "balanced" ? 1500 : 800;
+              obj.target = obj.type === "balanced" ? 800 : 500;
             }
           });
           
@@ -2213,7 +2218,11 @@
               achieved = ongoingObjectives.every(obj => obj.achieved);
             } 
             else if (achievement.description.includes("devil population")) {
-              achievement.frames = devils > 50 ? achievement.frames + 1 : Math.max(0, achievement.frames - 10);
+              if (devils > 30) {
+                achievement.frames++;
+              } else {
+                achievement.frames = Math.max(0, achievement.frames - 10);
+              }
               achieved = achievement.frames >= achievement.target;
             }
             else if (achievement.description.includes("bandicoot population")) {
@@ -2328,36 +2337,34 @@
           drawPopulationIndicator(4 * spacing, p.height/2, smoothedBandicoots, "#FFEB3B", "Bandicoots");
         }
 
-        // Draw food web connections
+        // Draw food web connections - FIXED with straight lines
         function drawFoodWeb() {
           p.strokeWeight(2);
           const spacing = p.width / 5;
           
-          // Grass → Pademelons
+          // Grass → Pademelons (direct feeding)
           if (grass > 20 && pademelons > 5) {
             p.stroke(76, 175, 80, 150);
             p.line(spacing + 20, p.height/2, 2 * spacing - 20, p.height/2);
           }
           
-          // Pademelons → Devils
+          // Pademelons → Devils (direct predation)
           if (pademelons > 5 && devils > 2) {
             p.stroke(244, 67, 54, 150);
             p.line(2 * spacing + 20, p.height/2, 3 * spacing - 20, p.height/2);
           }
           
-          // Bandicoots → Grass (positive feedback)
+          // Bandicoots → Devils (direct predation)
+          if (bandicoots > 5 && devils > 2) {
+            p.stroke(155, 89, 182, 150); // Purple for bandicoot-devil connection
+            p.line(4 * spacing - 20, p.height/2, 3 * spacing + 20, p.height/2);
+          }
+          
+          // Bandicoots → Grass (positive feedback - dashed line for indirect effect)
           if (bandicoots > 5 && grass > 20) {
             p.stroke(255, 235, 59, 150);
             p.drawingContext.setLineDash([5, 3]);
             p.line(4 * spacing - 20, p.height/2, spacing + 20, p.height/2);
-            p.drawingContext.setLineDash([]);
-          }
-          
-          // Bandicoots → Devils (secondary predation)
-          if (bandicoots > 5 && devils > 2) {
-            p.stroke(155, 89, 182, 100);
-            p.drawingContext.setLineDash([3, 3]);
-            p.line(4 * spacing - 40, p.height/2 + 20, 3 * spacing + 20, p.height/2 - 20);
             p.drawingContext.setLineDash([]);
           }
         }
@@ -2445,7 +2452,7 @@
           }
         }
 
-        // Update objective display
+        // Update objective display - UPDATED with new progress calculations
         function updateObjectiveDisplay() {
           const nextObj = objectives.find(obj => !obj.achieved) || 
                           ongoingObjectives.find(obj => !obj.achieved);
@@ -2455,18 +2462,31 @@
             
             // Calculate progress percentage
             let progress = 0;
-            if (nextObj.target && nextObj.target !== nextObj.points) {
-              if (nextObj.type === "balanced") {
-                progress = Math.min(100, Math.round(((1500 - nextObj.target) / 1500) * 100));
-              } else if (nextObj.type === "grass" || nextObj.type === "devils") {
-                progress = Math.min(100, Math.round(((800 - nextObj.target) / 800) * 100));
-              } else if (nextObj.type === "pademelons") {
-                progress = Math.min(100, Math.round((pademelons / 200) * 100));
-              } else if (nextObj.type === "apex_stability") {
-                progress = Math.min(100, Math.round(((devils / 100 + (grass > 400 ? 50 : 0)) / 2)));
-              } else if (nextObj.type === "biodiversity") {
-                progress = Math.min(100, Math.round((customFrameCount / 1000) * 100));
-              }
+            
+            // Main objectives
+            if (nextObj.type === "pademelons") {
+              progress = Math.min(100, Math.round((pademelons / 120) * 100));
+            } 
+            else if (nextObj.type === "apex_stability") {
+              const devilProgress = Math.min(50, devils) / 50 * 50;
+              const grassProgress = grass > 300 ? 50 : (grass / 300) * 50;
+              progress = Math.min(100, Math.round(devilProgress + grassProgress));
+            }
+            else if (nextObj.type === "keystone_effect") {
+              // Track grass growth relative to baseline
+              const baselineGrass = 400;
+              progress = Math.min(100, Math.round((grass / baselineGrass) * 77)); // 77% = 30% boost
+            }
+            else if (nextObj.type === "disasters") {
+              progress = Math.min(100, Math.round(((nextObj.count || 0) / 5) * 100));
+            }
+            else if (nextObj.type === "biodiversity") {
+              progress = Math.min(100, Math.round((customFrameCount / 500) * 100));
+            }
+            // Ongoing objectives
+            else if (nextObj.type === "grass" || nextObj.type === "devils" || nextObj.type === "balanced") {
+              const total = nextObj.type === "balanced" ? 800 : 500;
+              progress = Math.min(100, Math.round(((total - nextObj.target) / total) * 100));
             }
             
             // Update progress bar
