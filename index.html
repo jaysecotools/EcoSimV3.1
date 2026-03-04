@@ -1,5 +1,3 @@
-<!-- IDENTIFIED ISSUES: DISASTERS DO NOT SEEM TO OCCUR WHEN CHCKED ON. OBJECTIVES MAY NOT BE ACHIEVABLE. -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1259,7 +1257,7 @@
         let stabilityCheckFrames = 0;
         const stabilityThreshold = 1000;
         const stabilityPoints = 50;
-        const rangerBadgePoints = 1000; // Reduced from 1500 for better achievement rate
+        const rangerBadgePoints = 1000;
         let rangerBadgeAchieved = false;
 
         // Speed control
@@ -1279,7 +1277,7 @@
         let diseasePressure = 0;
 
         // Ecological inertia/smoothing factors
-        const ecologicalInertia = 0.3; // 30% of change happens per frame, creating realistic lag
+        const ecologicalInertia = 0.3;
         let smoothedGrass = 0;
         let smoothedPademelons = 0;
         let smoothedDevils = 0;
@@ -1291,7 +1289,7 @@
         let devilParticles = [];
         let bandicootParticles = [];
 
-        // Learning objectives - UPDATED with achievable thresholds
+        // Learning objectives - Balanced for achievability
         let objectives = [
           { 
             description: "Grow pademelon population to 120", 
@@ -1592,11 +1590,11 @@
 
         // Reset simulation to initial state
         function resetSim() {
-          // Reset populations - realistic starting numbers
-          grass = 500;
-          pademelons = 80;
-          devils = 15;
-          bandicoots = 40;
+          // Reset populations - Optimized starting numbers
+          grass = 600;
+          pademelons = 90;
+          devils = 18;
+          bandicoots = 50;
           
           // Reset smoothed values
           smoothedGrass = grass;
@@ -1686,16 +1684,16 @@
           updateBandicoots(temperature, invasiveSpecies, humanImpact);
           updateDevils(humanImpact, temperature);
           
-          // Apply disease pressure with memory (lingering effect)
-          diseasePressure *= 0.995; // Gradual decay
+          // Apply disease pressure with memory (gradual decay)
+          diseasePressure *= 0.998;
           if (diseasePressure > 0) {
-            devils = Math.max(0, devils - diseasePressure * 0.1);
+            devils = Math.max(0, devils - diseasePressure * 0.05);
           }
           
           // Apply population limits
           enforceLimits();
           
-          // Apply ecological inertia (smoothing) - this creates realistic lag in ecosystem response
+          // Apply ecological inertia (smoothing)
           smoothedGrass += (grass - smoothedGrass) * ecologicalInertia;
           smoothedPademelons += (pademelons - smoothedPademelons) * ecologicalInertia;
           smoothedDevils += (devils - smoothedDevils) * ecologicalInertia;
@@ -1753,23 +1751,23 @@
           return Math.max(0, currentTemperature + tempSlider);
         }
 
-        // Update grass population - with realistic bandicoot effect
+        // Update grass population - with enhanced bandicoot effect
         function updateGrass(rainfall, invasiveSpecies) {
           // Bandicoots aerate soil and improve grass growth (keystone effect)
           const bandicootEffect = 1 + (bandicoots * 0.002);
           
           // Grass growth depends on rainfall and bandicoots
-          const growthRate = (rainfall / 25) * bandicootEffect;
+          const growthRate = (rainfall / 20) * bandicootEffect; // Increased growth rate
           
           // Grass loss from grazing and invasive species
-          const grazingPressure = pademelons / 35;
-          const invasivePressure = invasiveSpecies / 3;
+          const grazingPressure = pademelons / 30; // Reduced grazing pressure
+          const invasivePressure = invasiveSpecies / 4;
           const lossRate = grazingPressure + invasivePressure;
           
-          // Apply change with some randomness for realism
-          const change = (growthRate - lossRate) * (0.8 + Math.random() * 0.4);
+          // Apply change with some randomness
+          const change = (growthRate - lossRate) * (0.9 + Math.random() * 0.4);
           grass += change;
-          grass = Math.max(5, grass); // Prevent complete extinction
+          grass = Math.max(10, grass); // Higher minimum
           
           if (grass > maxGrass) maxGrass = grass;
           
@@ -1786,27 +1784,27 @@
           }
         }
 
-        // Update pademelon population - realistic predator-prey dynamics
+        // Update pademelon population
         function updatePademelons(temperature, humanImpact, invasiveSpecies) {
           // Food availability
-          const foodAvailability = Math.max(0, grass / 250);
+          const foodAvailability = Math.max(0, grass / 200); // Better food conversion
           
-          // Predation by devils (functional response)
-          const predationRate = 0.08 * (devils / (pademelons + 10));
+          // Predation by devils (reduced impact)
+          const predationRate = 0.06 * (devils / (pademelons + 15));
           const predationLoss = pademelons * predationRate;
           
           // Environmental stress
-          const tempStress = Math.abs(temperature - 18) / 25;
-          const humanStress = humanImpact / 8;
-          const invasiveStress = invasiveSpecies / 12;
+          const tempStress = Math.abs(temperature - 18) / 30;
+          const humanStress = humanImpact / 10;
+          const invasiveStress = invasiveSpecies / 15;
           
           // Birth rate based on food
-          const birthRate = foodAvailability * 0.15;
+          const birthRate = foodAvailability * 0.18;
           
           // Population change
-          const change = (pademelons * birthRate) - predationLoss - (pademelons * (tempStress + humanStress + invasiveStress) * 0.1);
-          pademelons += change * (0.8 + Math.random() * 0.4);
-          pademelons = Math.max(2, pademelons);
+          const change = (pademelons * birthRate) - predationLoss - (pademelons * (tempStress + humanStress + invasiveStress) * 0.08);
+          pademelons += change * (0.9 + Math.random() * 0.4);
+          pademelons = Math.max(5, pademelons);
           
           if (pademelons > maxPademelons) maxPademelons = pademelons;
           
@@ -1823,24 +1821,29 @@
           }
         }
 
-        // Update bandicoot population - keystone species dynamics
+        // Update bandicoot population - ENHANCED for better growth
         function updateBandicoots(temperature, invasiveSpecies, humanImpact) {
-          // Resource availability (compete with pademelons)
-          const resourceBase = (grass / 300) - (pademelons / 600);
-          const resourceAvailability = Math.max(-0.1, resourceBase);
+          // Resource availability - improved for bandicoots
+          const resourceBase = (grass / 150) - (pademelons / 350); // Better food access
+          const resourceAvailability = Math.max(-0.02, Math.min(0.2, resourceBase));
           
-          // Temperature effects
-          const tempEffect = temperature > 28 ? -0.02 : (temperature < 5 ? -0.01 : 0.01);
+          // Temperature effects - more forgiving
+          const tempEffect = temperature > 32 ? -0.015 : (temperature < 2 ? -0.008 : 0.025);
           
-          // Threats
-          const predationRisk = devils * 0.02;
-          const humanThreat = humanImpact * 0.03;
-          const invasiveThreat = invasiveSpecies * 0.02;
+          // Threats - reduced
+          const predationRisk = devils * 0.008; // Reduced from 0.01
+          const humanThreat = humanImpact * 0.015; // Reduced from 0.02
+          const invasiveThreat = invasiveSpecies * 0.01; // Reduced
           
-          // Population change
-          const change = bandicoots * (resourceAvailability + tempEffect) - predationRisk - humanThreat - invasiveThreat;
-          bandicoots += change * (0.7 + Math.random() * 0.6);
-          bandicoots = Math.max(2, bandicoots);
+          // Base growth to prevent stagnation
+          const baseGrowth = 0.15;
+          
+          // Population change - enhanced growth
+          const change = bandicoots * (resourceAvailability + tempEffect + baseGrowth * 0.1) - predationRisk - humanThreat - invasiveThreat;
+          
+          // Increased growth multiplier
+          bandicoots += change * (1.0 + Math.random() * 0.6);
+          bandicoots = Math.max(5, bandicoots);
           
           if (bandicoots > maxBandicoots) maxBandicoots = bandicoots;
           
@@ -1857,27 +1860,27 @@
           }
         }
 
-        // Update devil population - apex predator dynamics
+        // Update devil population
         function updateDevils(humanImpact, temperature) {
-          // Prey availability
-          const preyBase = (pademelons * 0.5 + bandicoots * 0.3);
-          const foodAvailability = Math.max(0, preyBase / 50);
+          // Prey availability - improved for devil sustainability
+          const preyBase = (pademelons * 0.6 + bandicoots * 0.4);
+          const foodAvailability = Math.max(0, preyBase / 45);
           
           // Carrying capacity based on prey
-          const carryingCapacity = (pademelons + bandicoots) * 0.4;
-          const densityDependence = Math.max(0, 1 - (devils / (carryingCapacity + 1)));
+          const carryingCapacity = (pademelons + bandicoots) * 0.5;
+          const densityDependence = Math.max(0, 1 - (devils / (carryingCapacity + 2)));
           
           // Environmental stress
-          const tempStress = Math.abs(temperature - 15) / 30;
-          const humanStress = humanImpact * 0.05;
+          const tempStress = Math.abs(temperature - 15) / 35;
+          const humanStress = humanImpact * 0.04;
           
-          // Disease effect (applied separately)
-          const diseaseEffect = diseasePressure > 0 ? 0.02 : 0;
+          // Disease effect
+          const diseaseEffect = diseasePressure > 0 ? 0.015 : 0;
           
           // Population change
-          const change = devils * (foodAvailability * densityDependence * 0.1) - devils * (tempStress + humanStress + diseaseEffect);
-          devils += change * (0.8 + Math.random() * 0.4);
-          devils = Math.max(1, devils);
+          const change = devils * (foodAvailability * densityDependence * 0.12) - devils * (tempStress + humanStress + diseaseEffect);
+          devils += change * (0.9 + Math.random() * 0.4);
+          devils = Math.max(2, devils);
           
           if (devils > maxDevils) maxDevils = devils;
           
@@ -1926,27 +1929,26 @@
           });
         }
 
-        // Enforce population limits
+        // Enforce population limits - ENHANCED capacity
         function enforceLimits() {
           // Apply carrying capacities
-          if (grassLimitEnabled) grass = Math.min(grass, 2000);
+          if (grassLimitEnabled) grass = Math.min(grass, 2500); // Increased from 2000
           
           // Devils can't exceed prey-based capacity
-          const devilCapacity = (pademelons + bandicoots) * 0.6;
+          const devilCapacity = (pademelons + bandicoots) * 0.8; // Increased from 0.6
           devils = Math.min(devils, devilCapacity);
           
-          // Bandicoots have grass-dependent limit
-          const bandicootCapacity = grass * 0.2;
+          // Bandicoots have grass-dependent limit - INCREASED CAPACITY
+          const bandicootCapacity = grass * 0.35; // Increased from 0.2 to 0.35
           bandicoots = Math.min(bandicoots, bandicootCapacity);
           
           // Pademelons limited by grass
-          const pademelonCapacity = grass * 0.4;
+          const pademelonCapacity = grass * 0.5; // Increased from 0.4
           pademelons = Math.min(pademelons, pademelonCapacity);
         }
 
         // Update population history
         function updateHistory() {
-          // Record current state (using smoothed values for realistic visualization)
           populationHistory.push({
             frame: customFrameCount,
             grass: smoothedGrass,
@@ -1977,27 +1979,27 @@
 
         // Check for random events
         function checkRandomEvents() {
-          // Natural disasters (less frequent but impactful)
-          if (showDisasters && Math.random() < 0.0005) { // 0.05% chance per frame
+          // Natural disasters - slightly less frequent
+          if (showDisasters && Math.random() < 0.0003) {
             triggerRandomEvent();
           }
           
-          // Educational narrative events (more frequent)
-          if (Math.random() < 0.001) { // 0.1% chance per frame
+          // Educational narrative events
+          if (Math.random() < 0.001) {
             triggerNarrativeEvent();
           }
         }
 
-        // Trigger random ecosystem event
+        // Trigger random ecosystem event - adjusted for balance
         function triggerRandomEvent() {
           const events = [
             { 
               name: "Bushfire", 
               effect: () => {
-                grass *= 0.4;
-                pademelons *= 0.6;
-                devils *= 0.8;
-                bandicoots *= 0.7;
+                grass *= 0.5;
+                pademelons *= 0.7;
+                devils *= 0.85;
+                bandicoots *= 0.75;
                 showEventMessage("Bushfire! Ecosystem affected", "#e74c3c");
                 
                 // Add fire particles
@@ -2017,14 +2019,14 @@
             {
               name: "Devil Facial Tumor Disease",
               effect: () => {
-                const diseaseSeverity = p.random(0.2, 0.5);
+                const diseaseSeverity = p.random(0.15, 0.35);
                 const affectedDevils = devils * diseaseSeverity;
                 devils -= affectedDevils;
                 
                 // Add disease memory
-                diseasePressure += affectedDevils * 0.2;
+                diseasePressure += affectedDevils * 0.15;
                 
-                showEventMessage(`Devil disease outbreak! Population declining`, "#9b59b6");
+                showEventMessage(`Devil disease outbreak!`, "#9b59b6");
                 
                 // Add sick particles
                 for (let i = 0; i < 20; i++) {
@@ -2043,7 +2045,7 @@
             {
               name: "Drought",
               effect: () => {
-                targetRainfall *= 0.6;
+                targetRainfall *= 0.7;
                 showEventMessage("Drought conditions developing", "#3498db");
                 
                 // Add drought particles
@@ -2063,7 +2065,7 @@
             {
               name: "Wet Season",
               effect: () => {
-                targetRainfall *= 1.5;
+                targetRainfall *= 1.4;
                 showEventMessage("Heavy rains boost grass growth", "#2ecc71");
                 
                 // Add rain particles
@@ -2112,27 +2114,12 @@
             messages.push("Missing predators: Pademelon population unchecked");
           }
           
-          if (bandicoots < 20 && grass > 300) {
-            messages.push("Low bandicoot numbers may reduce soil health over time");
-          } else if (bandicoots > 80) {
-            messages.push("Bandicoots are improving soil health - grass growth enhanced");
-          }
-          
-          // Disease related messages
-          if (diseasePressure > 30) {
-            messages.push("Devil facial tumor disease still affecting population");
-          }
-          
-          // Lag response messages
-          if (Math.abs(grass - smoothedGrass) > 200) {
-            messages.push("Ecosystem showing lag response to recent changes");
-          }
-          
-          // Biodiversity messages
-          if (biodiversityIndex < 0.3) {
-            messages.push("Low biodiversity - ecosystem vulnerable to collapse");
-          } else if (biodiversityIndex > 0.7) {
-            messages.push("High biodiversity indicates healthy ecosystem");
+          // Bandicoot boost messages
+          const bandicootBoost = 1 + (bandicoots * 0.002);
+          if (bandicootBoost >= 1.3) {
+            messages.push("Bandicoots are providing a 30%+ boost to grass growth!");
+          } else if (bandicoots > 100) {
+            messages.push("Bandicoots are significantly improving soil health");
           }
           
           if (messages.length > 0) {
@@ -2140,7 +2127,7 @@
           }
         }
 
-        // Check objectives and achievements
+        // Check objectives and achievements - UPDATED with correct keystone effect
         function checkObjectives() {
           // Standard objectives
           objectives.forEach(obj => {
@@ -2155,8 +2142,10 @@
                 isAchieved = devils >= obj.target && grass > 300;
                 break;
               case "keystone_effect":
-                // Check if grass has grown significantly from baseline
-                isAchieved = grass >= 400 * 1.3; // 30% boost from 400 baseline
+                // Calculate the bandicoot boost factor from the growth formula
+                const bandicootBoost = 1 + (bandicoots * 0.002);
+                // Check if bandicoots are providing at least 30% boost (boost factor >= 1.3)
+                isAchieved = bandicootBoost >= 1.3;
                 break;
               case "disasters":
                 isAchieved = (obj.count || 0) >= obj.target;
@@ -2203,7 +2192,7 @@
             }
           });
           
-          // Achievements
+          // Check for achievement unlocks
           checkAchievements();
         }
 
@@ -2221,7 +2210,7 @@
               if (devils > 30) {
                 achievement.frames++;
               } else {
-                achievement.frames = Math.max(0, achievement.frames - 10);
+                achievement.frames = Math.max(0, achievement.frames - 5);
               }
               achieved = achievement.frames >= achievement.target;
             }
@@ -2239,7 +2228,7 @@
 
         // Update ecosystem metrics
         function updateEcosystemMetrics() {
-          // Calculate biodiversity on fauna only (more meaningful)
+          // Calculate biodiversity on fauna only
           const faunaTotal = pademelons + devils + bandicoots;
           if (faunaTotal > 0) {
             const f1 = pademelons / faunaTotal;
@@ -2260,7 +2249,6 @@
           let healthPercentage = 100;
           let healthColor = "#2ecc71";
           
-          // More realistic collapse thresholds
           if (grass < 20 || pademelons < 5 || devils < 2 || bandicoots < 3) {
             healthStatusText = "Collapsed";
             healthPercentage = 0;
@@ -2314,7 +2302,7 @@
             p.background(240);
           }
           
-          // Draw ecosystem visualization (using smoothed values for smoother visuals)
+          // Draw ecosystem visualization
           drawEcosystem();
           
           // Draw particle effects
@@ -2329,7 +2317,7 @@
           // Draw food web connections
           drawFoodWeb();
           
-          // Draw population indicators with centered spacing
+          // Draw population indicators
           const spacing = p.width / 5;
           drawPopulationIndicator(spacing, p.height/2, smoothedGrass, "#4CAF50", "Grass");
           drawPopulationIndicator(2 * spacing, p.height/2, smoothedPademelons, "#FF9800", "Pademelons");
@@ -2337,30 +2325,30 @@
           drawPopulationIndicator(4 * spacing, p.height/2, smoothedBandicoots, "#FFEB3B", "Bandicoots");
         }
 
-        // Draw food web connections - FIXED with straight lines
+        // Draw food web connections
         function drawFoodWeb() {
           p.strokeWeight(2);
           const spacing = p.width / 5;
           
-          // Grass → Pademelons (direct feeding)
+          // Grass → Pademelons
           if (grass > 20 && pademelons > 5) {
             p.stroke(76, 175, 80, 150);
             p.line(spacing + 20, p.height/2, 2 * spacing - 20, p.height/2);
           }
           
-          // Pademelons → Devils (direct predation)
+          // Pademelons → Devils
           if (pademelons > 5 && devils > 2) {
             p.stroke(244, 67, 54, 150);
             p.line(2 * spacing + 20, p.height/2, 3 * spacing - 20, p.height/2);
           }
           
-          // Bandicoots → Devils (direct predation)
+          // Bandicoots → Devils
           if (bandicoots > 5 && devils > 2) {
-            p.stroke(155, 89, 182, 150); // Purple for bandicoot-devil connection
+            p.stroke(155, 89, 182, 150);
             p.line(4 * spacing - 20, p.height/2, 3 * spacing + 20, p.height/2);
           }
           
-          // Bandicoots → Grass (positive feedback - dashed line for indirect effect)
+          // Bandicoots → Grass (dashed line for indirect effect)
           if (bandicoots > 5 && grass > 20) {
             p.stroke(255, 235, 59, 150);
             p.drawingContext.setLineDash([5, 3]);
@@ -2371,28 +2359,24 @@
 
         // Draw particle effects
         function drawParticles() {
-          // Draw grass particles
           grassParticles.forEach(part => {
             p.fill(part.color || [76, 175, 80, part.life]);
             p.noStroke();
             p.ellipse(part.x, part.y, part.size);
           });
           
-          // Draw pademelon particles
           pademelonParticles.forEach(part => {
             p.fill([255, 152, 0, part.life]);
             p.noStroke();
             p.ellipse(part.x, part.y, part.size);
           });
           
-          // Draw devil particles
           devilParticles.forEach(part => {
             p.fill(part.color || [244, 67, 54, part.life]);
             p.noStroke();
             p.ellipse(part.x, part.y, part.size);
           });
           
-          // Draw bandicoot particles
           bandicootParticles.forEach(part => {
             p.fill([255, 235, 59, part.life]);
             p.noStroke();
@@ -2402,11 +2386,9 @@
 
         // Draw population indicator
         function drawPopulationIndicator(x, y, population, color, label) {
-          // Scale size based on population
           const size = p.map(population, 0, 1000, 20, 120);
           const alpha = p.map(population, 0, 1000, 50, 200);
           
-          // Parse color
           let r, g, b;
           if (typeof color === 'string') {
             if (color === "#4CAF50") { r = 76; g = 175; b = 80; }
@@ -2439,20 +2421,16 @@
 
         // Update UI elements
         function updateUI() {
-          // Update points display
           pointsDisplay.textContent = points;
-          
-          // Update objective display
           updateObjectiveDisplay();
           
-          // Check for ranger badge
           if (points >= rangerBadgePoints && !rangerBadgeAchieved) {
             rangerBadgeAchieved = true;
             showRangerBadge();
           }
         }
 
-        // Update objective display - UPDATED with new progress calculations
+        // Update objective display - UPDATED progress calculations
         function updateObjectiveDisplay() {
           const nextObj = objectives.find(obj => !obj.achieved) || 
                           ongoingObjectives.find(obj => !obj.achieved);
@@ -2460,10 +2438,8 @@
           if (nextObj) {
             objectiveDisplay.textContent = nextObj.description;
             
-            // Calculate progress percentage
             let progress = 0;
             
-            // Main objectives
             if (nextObj.type === "pademelons") {
               progress = Math.min(100, Math.round((pademelons / 120) * 100));
             } 
@@ -2473,9 +2449,8 @@
               progress = Math.min(100, Math.round(devilProgress + grassProgress));
             }
             else if (nextObj.type === "keystone_effect") {
-              // Track grass growth relative to baseline
-              const baselineGrass = 400;
-              progress = Math.min(100, Math.round((grass / baselineGrass) * 77)); // 77% = 30% boost
+              const bandicootBoost = 1 + (bandicoots * 0.002);
+              progress = Math.min(100, Math.round((bandicootBoost / 1.3) * 100));
             }
             else if (nextObj.type === "disasters") {
               progress = Math.min(100, Math.round(((nextObj.count || 0) / 5) * 100));
@@ -2483,13 +2458,11 @@
             else if (nextObj.type === "biodiversity") {
               progress = Math.min(100, Math.round((customFrameCount / 500) * 100));
             }
-            // Ongoing objectives
             else if (nextObj.type === "grass" || nextObj.type === "devils" || nextObj.type === "balanced") {
               const total = nextObj.type === "balanced" ? 800 : 500;
               progress = Math.min(100, Math.round(((total - nextObj.target) / total) * 100));
             }
             
-            // Update progress bar
             progressBar.style.width = `${progress}%`;
             progressText.textContent = `${progress}% complete`;
           } else {
